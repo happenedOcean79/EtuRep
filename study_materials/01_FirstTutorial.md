@@ -5,7 +5,7 @@
 
 - [Содержание](#содержание)
 - [Вводная](#вводная)
-- [Терминал](#терминал)
+- [Начнем с терминала, пожалуй](#начнем-с-терминала-пожалуй)
   - [ls](#ls)
   - [mkdir](#mkdir)
   - [cd](#cd)
@@ -22,6 +22,7 @@
   - [Импорт переменных из скрипта](#импорт-переменных-из-скрипта)
   - [Точка входа терминала](#точка-входа-терминала)
 - [Команды для обработки вывода](#команды-для-обработки-вывода)
+- [Какие-то особенные команды ROS](#какие-то-особенные-команды-ros)
 - [Робот, покажись!](#робот-покажись)
 - [Пора двигаться!](#пора-двигаться)
 - [Научим робота видеть!](#научим-робота-видеть)
@@ -732,27 +733,27 @@ mkdir src
 cd src
 ```
 
-Теперь создаём пакет с названием `super_robot_package`:
+Теперь создаём пакет с названием `kitty_package`:
 
 > Если хочешь, можешь создать пакет со своим названием, но дальше тогда придется во всех командах заменять имя.
 
 ```bash
-catkin create pkg super_robot_package
+catkin create pkg kitty_package
 ```
 
 В выводе должен получиться подобный вывод:
 
 ```bash
-Creating package "super_robot_package" in "/home/user/catkin_ws/src"...
-Created file super_robot_package/package.xml
-Created file super_robot_package/CMakeLists.txt
-Successfully created package files in /home/user/catkin_ws/src/super_robot_package.
+Creating package "kitty_package" in "/home/user/catkin_ws/src"...
+Created file kitty_package/package.xml
+Created file kitty_package/CMakeLists.txt
+Successfully created package files in /home/user/catkin_ws/src/kitty_package.
 ```
 
 После создания пакета очень важно его собрать! Для этого используем команду для сборки:
 
 ```bash
-catkin build super_robot_package
+catkin build kitty_package
 ```
 
 В выводе увидите что-то такое:
@@ -764,8 +765,8 @@ NOTE: Forcing CMake to run for each package.
 [build] Updating package.
 Starting  >>> catkin_tools_prebuild
 Finished  <<< catkin_tools_prebuild                [ 2.1 seconds ]
-Starting  >>> super_robot_package
-Finished  <<< super_robot_package                  [ 1.9 seconds ]
+Starting  >>> kitty_package
+Finished  <<< kitty_package                  [ 1.9 seconds ]
 [build] Summary: All 2 packages succeeded!                                                                                                                                                                    
 ```
 
@@ -801,7 +802,7 @@ xmlrpcpp /opt/ros/noetic/share/xmlrpcpp
 Но в этом выводе тяжело искать, давайте отфильтруем этот список, поискав наш пакет:
 
 ```bash
-rospack list | grep super_robot_package
+rospack list | grep kitty_package
 ```
 
 Хм.. Ничего? То есть, наш пакет не видно? Давайте посмотрим, где ROS ищет пакеты с помощью переменной окружения `ROS_PACKAGE_PATH`:
@@ -824,8 +825,8 @@ source $HOME/catkin_ws/devel/setup.bash
 После её выполнения проверь наличие пакета!
 
 ```bash
-rospack list | grep super_robot_package
-# super_robot_package /home/user/catkin_ws/src/super_robot_package
+rospack list | grep kitty_package
+# kitty_package /home/user/catkin_ws/src/kitty_package
 ```
 
 Оп, вот и пакет нашёлся, значит он теперь учитывается в системе ROS.

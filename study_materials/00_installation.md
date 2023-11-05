@@ -7,6 +7,7 @@
 - [Как установить ROS?](#как-установить-ros)
 - [Как установить пакеты ROS?](#как-установить-пакеты-ros)
 - [Подготовка turtlebot3](#подготовка-turtlebot3)
+- [YDLIdar ROS Driver](#ydlidar-ros-driver)
 
 ## Как установить ROS?
 
@@ -57,4 +58,25 @@ sudo apt install \
     ros-noetic-turtlebot3-slam \
     ros-noetic-turtlebot3-navigation
 ```
+
+## YDLIdar ROS Driver
+
+``` sh
+SDK_config_file="/usr/local/lib/cmake/ydlidar_sdk/ydlidar_sdkConfig.cmake"
+
+# Проверяем, существует ли файл
+if [ -f "$SDK_config_file" ]; then
+    echo "Файл $SDK_config_file существует. SDK YDLidar уже установлен."
+else
+    git clone https://github.com/YDLIDAR/YDLidar-SDK.git
+    mkdir -p YDLidar-SDK/build
+    cd YDLidar-SDK/build
+    cmake ..
+    make
+    sudo make install
+    cd ../..
+    rm -rf YDLidar-SDK
+fi
+```
+
 
