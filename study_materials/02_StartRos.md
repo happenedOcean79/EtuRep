@@ -211,6 +211,8 @@ rosmsg list
 Сначала взглянем на код, который будем разбирать:
 
 ```python
+#!/usr/bin/env python
+
 import rospy
 from std_msgs.msg import String
 
@@ -240,8 +242,9 @@ if __name__ == '__main__':
 
 А теперь перейдем к написанию узла подписки. 
 
-
 ```python
+#!/usr/bin/env python
+
 import rospy
 from std_msgs.msg import String
 
