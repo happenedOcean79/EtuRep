@@ -56,7 +56,8 @@ sudo apt install \
     ros-noetic-turtlebot3-gazebo \
     ros-noetic-turtlebot3-teleop \
     ros-noetic-turtlebot3-slam \
-    ros-noetic-turtlebot3-navigation
+    ros-noetic-turtlebot3-navigation \
+    ros-noetic-teleop-twist-joy 
 ```
 
 ## YDLIdar ROS Driver

@@ -15,7 +15,7 @@
   - [Создание опций для launch-файлов](#создание-опций-для-launch-файлов)
 - [Управление параметрами](#управление-параметрами)
 - [YDLidar X2](#ydlidar-x2)
-- [Joy](#joy)
+- [Время двигаться!](#время-двигаться)
 
 ## ROS узлы и топики
 
@@ -636,7 +636,23 @@ if __name__ == '__main__':
 ```
 </details>
 
-## Joy
+## Время двигаться!
+
+```bash
+TURTLEBOT3_MODEL=waffle roslaunch turtlebot3_gazebo turtlebot3_world.launch
+```
+
+```bash
+TURTLEBOT3_MODEL=waffle roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
+```
+
+<p align="center">
+<img src="../assets/lesson_02/teleop01.png" width=500>
+</p>
+
+<p align="center">
+<img src="../assets/lesson_02/teleop02.png" width=500>
+</p>
 
 Беспроводный геймпад Logitech F710 – это универсальный и популярный геймпад, предназначенный для использования как с ПК, так и с устройствами на платформе Android. Он предлагает беспроводное подключение и ряд функций.
 
@@ -686,3 +702,49 @@ if __name__ == '__main__':
 ```bash
 roslaunch kitty_package my_joy_launch.launch
 ```
+
+<p align="center">
+<img src="../assets/lesson_02/joy01.png" width=500>
+</p>
+
+```bash
+TURTLEBOT3_MODEL=waffle roslaunch turtlebot3_gazebo turtlebot3_world.launch
+```
+```xml
+<launch>
+  <arg name="joy_config" default="ps3" />
+  <arg name="joy_dev" default="/dev/input/js0" />
+  <arg name="config_filepath" default="$(find teleop_twist_joy)/config/$(arg joy_config).config.yaml" />
+  
+  <node pkg="joy" type="joy_node" name="joy_node">
+    <param name="dev" value="$(arg joy_dev)" />
+    <param name="deadzone" value="0.3" />
+    <param name="autorepeat_rate" value="20" />
+  </node>
+
+  <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
+    <rosparam command="load" file="$(arg config_filepath)" />
+  </node>
+</launch>
+```
+
+```yaml
+axis_linear: 1  # Left thumb stick vertical
+scale_linear: 0.7
+scale_linear_turbo: 1.5
+
+axis_angular: 0  # Left thumb stick horizontal
+scale_angular: 0.4
+
+enable_button: 2  # Left trigger button
+enable_turbo_button: 5  # Right trigger button
+```
+
+```bash
+roslaunch teleop_twist_joy teleop.launch joy_config:=xbox
+```
+Для движения нашего робота нужно держать кнопку `X` или если мы хотим прокатиться в турбо режиме - `RB`
+
+<p align="center">
+<img src=../assets/lesson_02/joy_control.gif width=400/>
+</p>
