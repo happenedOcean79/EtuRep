@@ -490,8 +490,6 @@ Lidar YDLidar X2 - это лидар с 2D-сканированием, осно�
     <!-- frequency is invalid, External PWM control speed -->
     <param name="frequency"    type="double" value="10.0"/>
   </node>
-  <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser4"
-    args="0.0 0.0 0.2 0.0 0.0 0.0 /base_footprint /laser_frame 40" />
 </launch>
 ```
 
