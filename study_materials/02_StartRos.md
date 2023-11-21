@@ -558,7 +558,7 @@ TURTLEBOT3_MODEL=waffle roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
 | 4      | Крестовина влево/вправо                  |
 | 5      | Крестовина вверх/вниз                   |
 
-Перейдем к запуску нашего джойстика. Давайте создадим launch файл, к примеру, ```my_joy_launch.launch```
+Перейдем к запуску нашего джойстика. Давайте создадим launch файл, к примеру, ```my_joy_launch.launch```, для этого внутри нашего пакета создадим папку  ```kitty_software```, а в ней папку ```launch```, а там ```drivers```
 
 ```xml
 <launch>
@@ -577,26 +577,7 @@ roslaunch kitty_package my_joy_launch.launch
 <img src="../assets/lesson_02/joy01.png" width=500>
 </p>
 
-```bash
-TURTLEBOT3_MODEL=waffle roslaunch turtlebot3_gazebo turtlebot3_world.launch
-```
-```xml
-<launch>
-  <arg name="joy_config" default="ps3" />
-  <arg name="joy_dev" default="/dev/input/js0" />
-  <arg name="config_filepath" default="$(find teleop_twist_joy)/config/$(arg joy_config).config.yaml" />
-  
-  <node pkg="joy" type="joy_node" name="joy_node">
-    <param name="dev" value="$(arg joy_dev)" />
-    <param name="deadzone" value="0.3" />
-    <param name="autorepeat_rate" value="20" />
-  </node>
-
-  <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
-    <rosparam command="load" file="$(arg config_filepath)" />
-  </node>
-</launch>
-```
+Теперь перейдем к управлению роботом! Для этого помимо драйвера нужно запустить файл отправки команд на робота. Для этого создайте в своём пакете папку config и добавьте туда файл joy.config.yaml со следующим содержанием:
 
 ```yaml
 axis_linear: 1  # Left thumb stick vertical
@@ -610,11 +591,38 @@ enable_button: 2  # Left trigger button
 enable_turbo_button: 5  # Right trigger button
 ```
 
+ Модернизируем предыдущий лаунч следующим способом: 
+
+```xml
+<launch>
+  <arg name="joy_dev" default="/dev/input/js0" />
+  <arg name="config_filepath" default="$(find kitty_package)/config/joy.config.yaml" />
+  
+  <node pkg="joy" type="joy_node" name="joy_node">
+    <param name="dev" value="$(arg joy_dev)" />
+    <param name="deadzone" value="0.3" />
+    <param name="autorepeat_rate" value="20" />
+  </node>
+
+  <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
+    <rosparam command="load" file="$(arg config_filepath)" />
+  </node>
+</launch>
+```
+Запустим робота и управление с джойстика
 ```bash
-roslaunch teleop_twist_joy teleop.launch joy_config:=xbox
+TURTLEBOT3_MODEL=waffle roslaunch turtlebot3_gazebo turtlebot3_world.launch
+```
+
+```bash
+roslaunch kitty_package my_joy_launch.launch
 ```
 Для движения нашего робота нужно держать кнопку `X` или если мы хотим прокатиться в турбо режиме - `RB`
 
 <p align="center">
 <img src=../assets/lesson_02/joy_control.gif width=400/>
 </p>
+
+Задание:
+- Измените конфиг так, чтобы робот начал двигаться быстрее.
+- Посмотрите в каком формате присылает данные узел `teleop_twist_joy`. За что отвечает каждое поле?
