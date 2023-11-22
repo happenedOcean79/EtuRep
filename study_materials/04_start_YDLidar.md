@@ -155,65 +155,95 @@ roslaunch kitty_package full_start_lidar.launch rviz:=False
 <img src="../assets/lesson_02/terminal02.png" width=500>
 </p>
 
-Параметр  `support_motor_dtr` используется в драйвере YDLIDAR для определения того, поддерживает ли устройство управление направлением вращения двигателя через вывод DTR (Data Terminal Ready). По умолчанию, в `launch` лидара, который мы с вами запускаем, этот параметр принимает значение `False` , давайте откроем терминал и передадим ему значение `True`
+## Kitty Gmapping!
 
-```bash
-rostopic pub -1 /support_motor_dtr std_msgs/Bool "data: true"
+Настало время сделать систему построения карты не только в симуляторе, но и на нашем роботе. Для этого нужно сделать подготовку.
+Сейчас вам нужно в папку конфиг поместить `config` для `gmapping`, который обзовем, как `slam_gmapping.yaml`
+
+```yaml
+inverted_laser: false
+throttle_scans: 1
+base_frame: base_footprint
+map_frame: map
+odom_frame: odom
+map_update_interval: 1.0
+maxUrange: 9.0
+sigma: 0.05
+kernelSize: 1
+lstep: 0.05
+astep: 0.05
+iterations: 5
+lsigma: 0.075
+ogain: 3.0
+lskip: 0
+minimumScore: 200.0
+srr: 0.1
+srt: 0.2
+str: 0.1
+stt: 0.2
+linearUpdate: 0.1
+angularUpdate: 0.2
+temporalUpdate: -1.0
+resampleThreshold: 0.5
+particles: 80
+xmin: -10.0
+ymin: -10.0
+xmax: 10.0
+ymax: 10.0
+delta: 0.1
+llsamplerange: 0.01
+llsamplestep: 0.01
+lasamplerange: 0.005
+lasamplestep: 0.005
+transform_publish_period: 0.05
+occ_thresh: 0.25
+maxRange: 11.0
 ```
 
-Давайте проверим, что комманды таким образом доходят, для этого создадим ```kitty_vision->scripts->check_rostopic.py```
+Далее в `kitty_software->drivers` под названием `slam_gmapping.launch` создаем файл для запуска построения карты.
 
-```python
-#!/usr/bin/env python
-import rospy
-from std_msgs.msg import Bool
+```xml
+<?xml version="1.0"?>
+<launch>
+    <arg name="scan_input_topic" default="scan" />
+    <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" output="screen">
+        <rosparam file="$(find kitty_pkg)/config/slam_gmapping.yaml" command="load"/>
+        <remap from="scan" to="$(arg scan_input_topic)"/>
+    </node>
+</launch>
+```
+В `kitty_software->drivers` под названием `tf_transforms.launch` создаем файл для для публикации преобразований координат между различными системами координат (т.е. осями отсчета) робота, в нашем случае для камеры и лидара.
 
-def callback(data):
-    rospy.loginfo("Received %s", data.data)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
 
-rospy.init_node('check_rostopic')
-rospy.Subscriber("/support_motor_dtr", Bool, callback)
-rospy.spin()
+    <!-- main body -->
+    <node pkg="tf2_ros" type="static_transform_publisher"
+        name="base_footprint_2_base_link"
+        args="
+            0.0 0.0 0.109
+            0.0 0.0 0.0
+            /base_footprint /base_link" />
+
+    <!-- sensors -->
+    <!-- lidar -->
+    <node pkg="tf2_ros" type="static_transform_publisher"
+        name="base_link_2_bottom_ydlidar_scan_link"
+        args="
+            0.0 0.0 -0.009
+            0.0 0.0 0.0
+            /base_link /bottom_ydlidar_scan_link" />
+    <node pkg="tf2_ros" type="static_transform_publisher"
+        name="base_link_2_front_rs_d435i_camera_link"
+        args="
+            -0.045 0.0 0.29
+            0.0 0.226893.0 0.0
+            /base_link /front_rs_d435i_camera_link" />
+
+</launch>
 ```
 
-Далее в одном терминале выполните команду, а в другом запустите ваш скрипт. Тогда в первом терминале должно будет появится сообщение:
+Осталось совсем немного! Когда мы изучали одометрию, мы создали файл, объединяющий визуальную одометрию и запуск нашей камеры. 
 
-``` bash
-INFO: Received True
-```
-
-<p align="center">
-<img src="../assets/lesson_02/terminal03.png" width=500>
-</p>
-
->🦾 Напишите программу, в котором функция `send_stop_command()` создает Publisher на топик /`support_motor_dtr`. Затем она создает сообщение типа `Bool` с полем `data`, установленным в `False`. И наконец, публикует сообщение. Объект `rospy.Rate` обеспечивает отправку сообщения со скоростью 10 Гц.
-
-<details>
-<summary>
-👾👾👾 Внимание ответ!
-</summary>
-
-```python
-#!/usr/bin/env python
-
-import rospy
-from std_msgs.msg import Bool
-
-def send_stop_command():
-    # Publisher setup
-    pub = rospy.Publisher('/support_motor_dtr', Bool, queue_size=10)
-    rospy.init_node('support_motor_dtr_stopper', anonymous=True)
-    rate = rospy.Rate(10) # 10hz
-    msg = Bool()
-    msg.data = False
-    rospy.loginfo("Sending stop command...")
-    pub.publish(msg)
-    rate.sleep()
-
-if __name__ == '__main__':
-    try:
-        send_stop_command()
-    except rospy.ROSInterruptException:
-        pass
-```
-</details>
+>🦾	Объедините лаунчи `full_rs_odom.launch`, `tf_transforms.launch` и `slam_gmapping.launch` в один и проверьте, что все корректно запускается. Новый файл поместите в `kitty_software->full` и назовите его, как `full_gmapping.launch`
